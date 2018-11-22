@@ -5,11 +5,11 @@ Vagrant.configure('2') do |config|
 #    config.vm.box_url = 'http://files.vagrantup.com/precise64.box'
   end
   
-#  vagrantfiles = %w[vagrant/Vagrantfile.client vagrant/Vagrantfile.server]
+vagrantfiles = %w[./configs/Vagrantfile.rancher ]
 
-vagrantfiles = Dir.glob("./configs/*")
+#vagrantfiles = Dir.glob("./configs/*")
 
-
+#puts vagrantfiles
 
  vagrantfiles.each do |vagrantfile|
    load File.expand_path(vagrantfile) if File.exists?(vagrantfile)
