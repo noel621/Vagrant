@@ -1,0 +1,2 @@
+# Vagrant
+Personal vagrant projects
