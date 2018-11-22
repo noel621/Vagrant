@@ -9,7 +9,6 @@ Vagrant.configure('2') do |config|
 
 vagrantfiles = Dir.glob("./configs/*")
 
-puts vagrantfiles
 
 
  vagrantfiles.each do |vagrantfile|
