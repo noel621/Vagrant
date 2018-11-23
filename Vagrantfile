@@ -1,9 +1,9 @@
-Vagrant.configure('2') do |config|
+#Vagrant.configure('2') do |config|
 #    config.ssh.max_tries = 40
 #    config.ssh.timeout   = 120
 #    config.vm.box = 'precise64'
 #    config.vm.box_url = 'http://files.vagrantup.com/precise64.box'
-  end
+#  end
   
 vagrantfiles = %w[./configs/Vagrantfile.rancher ]
 
