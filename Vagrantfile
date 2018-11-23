@@ -5,7 +5,7 @@
 #    config.vm.box_url = 'http://files.vagrantup.com/precise64.box'
 #  end
   
-vagrantfiles = %w[./configs/Vagrantfile.rancher ]
+vagrantfiles = %w[./configs/Vagrantfile.rancher-centos ]
 
 #vagrantfiles = Dir.glob("./configs/*")
 
