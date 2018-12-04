@@ -7,7 +7,7 @@
 # you're doing.
 
 networktype = 'public_network'
-vmswitch = 'LAN'
+vmswitch = 'Bridged Adapter'
 
 nodes = [
   { :hostname => 'kub1', :ip => '192.168.69.41', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' },
