@@ -5,7 +5,7 @@
 #    config.vm.box_url = 'http://files.vagrantup.com/precise64.box'
 #  end
   
-vagrantfiles = %w[./configs/Vagrantfile.rancher-centos ]
+vagrantfiles = %w[./configs/Vagrantfile.rancher  ./configs/Vagrantfile.kubnodes ]
 
 #vagrantfiles = Dir.glob("./configs/*")
 
@@ -13,4 +13,4 @@ vagrantfiles = %w[./configs/Vagrantfile.rancher-centos ]
 
  vagrantfiles.each do |vagrantfile|
    load File.expand_path(vagrantfile) if File.exists?(vagrantfile)
-  end
+ end
