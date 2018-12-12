@@ -36,8 +36,8 @@ Vagrant.configure("2") do |config|
       # b.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
       # b.vm.network "private_network", ip: "192.168.33.10"
       #b.vm.network "public_network", bridge: 'LAN'
-      nodeconfig.vm.network networktype, bridge: vmswitch, ip: node[:ip]
-
+      #nodeconfig.vm.network networktype, bridge: vmswitch, ip: node[:ip]
+      nodeconfig.vm.network :public_network, bridge: 'br0', ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
       # b.vm.synced_folder "../data", "/vagrant_data"
 
       
@@ -61,8 +61,8 @@ Vagrant.configure("2") do |config|
       end
 
       nodeconfig.vm.provider "libvirt" do |dom|
-        dom.linked_clone = true
-        dom.name = 'Vagrant-' + node[:hostname]
+        #dom.linked_clone = true
+        #dom.name = 'Vagrant-' + node[:hostname]
         dom.cpus = node[:vcpus] 
         dom.memory = node[:ram]
       end
