@@ -52,6 +52,13 @@ Vagrant.configure("2") do |config|
         v.memory = node[:ram]
       end
 
+      nodeconfig.vm.provider "libvirt" do |dom|
+        dom.linked_clone = true
+        dom.name = 'Vagrant-' + node[:hostname]
+        dom.cpus = node[:vcpus] 
+        dom.memory = node[:ram]
+      end
+
 
       #
       # View the documentation for the provider you are using for more
