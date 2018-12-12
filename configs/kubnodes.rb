@@ -7,16 +7,15 @@
 # you're doing.
 
 networktype = 'public_network'
-vmswitch = 'Bridged Adapter'
+#vmswitch = 'Bridged Adapter'
+vmswitch = 'Default Switch'
+basesubnet = '192.168.69.'
 
 nodes = [
-  { :hostname => 'kub1', :ip => '192.168.69.41', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' },
-  { :hostname => 'kub2', :ip => '192.168.69.42', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' },
-  { :hostname => 'kub3', :ip => '192.168.69.43', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' }
+  { :hostname => 'kub1', :ip => basesubnet+'41', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' },
+  { :hostname => 'kub2', :ip => basesubnet+'42', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' },
+  { :hostname => 'kub3', :ip => basesubnet+'43', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' }
 ]
-
-#puts nodes
-
 
 Vagrant.configure("2") do |config|
   nodes.each do |node|
@@ -37,6 +36,8 @@ Vagrant.configure("2") do |config|
       nodeconfig.vm.network networktype, bridge: vmswitch, ip: node[:ip]
 
       # b.vm.synced_folder "../data", "/vagrant_data"
+
+      #load File.expand_path('./configs/Vagrantfile.rancher')
 
       nodeconfig.vm.provider "hyperv" do |h|
         h.enable_virtualization_extensions = false
