@@ -37,7 +37,8 @@ Vagrant.configure("2") do |config|
       # b.vm.network "private_network", ip: "192.168.33.10"
       #b.vm.network "public_network", bridge: 'LAN'
       #nodeconfig.vm.network networktype, bridge: vmswitch, ip: node[:ip]
-      nodeconfig.vm.network :public_network, bridge: 'br0', ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
+      #nodeconfig.vm.network :public_network, bridge: 'br0', ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
+      nodeconfig.vm.network :public_network, ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
       # b.vm.synced_folder "../data", "/vagrant_data"
 
       
@@ -63,6 +64,7 @@ Vagrant.configure("2") do |config|
       nodeconfig.vm.provider "libvirt" do |dom|
         #dom.linked_clone = true
         #dom.name = 'Vagrant-' + node[:hostname]
+        dom.disk_bus = 'sata'
         dom.cpus = node[:vcpus] 
         dom.memory = node[:ram]
       end

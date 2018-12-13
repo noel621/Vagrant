@@ -10,11 +10,13 @@ networktype = 'public_network'
 #vmswitch = 'Bridged Adapter'
 vmswitch = 'Default Switch'
 basesubnet = '192.168.69.'
+gateway = '1'
+boxtype = 'generic/ubuntu1810'
 
 nodes = [
-  { :hostname => 'kub1', :ip => basesubnet+'41', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' },
-  { :hostname => 'kub2', :ip => basesubnet+'42', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' },
-  { :hostname => 'kub3', :ip => basesubnet+'43', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' }
+  { :hostname => 'kub1', :ip => basesubnet+'41', :box => boxtype, :ram => '2048', :vcpus => '2', :gw => basesubnet+gateway },
+  { :hostname => 'kub2', :ip => basesubnet+'42', :box => boxtype, :ram => '2048', :vcpus => '2', :gw => basesubnet+gateway },
+  { :hostname => 'kub3', :ip => basesubnet+'43', :box => boxtype, :ram => '2048', :vcpus => '2', :gw => basesubnet+gateway }
 ]
 
 Vagrant.configure("2") do |config|
@@ -34,7 +36,8 @@ Vagrant.configure("2") do |config|
       # b.vm.network "private_network", ip: "192.168.33.10"
       #b.vm.network "public_network", bridge: 'LAN'
       #nodeconfig.vm.network networktype, bridge: vmswitch, ip: node[:ip], dev: 'enp0s25'
-      nodeconfig.vm.network :public_network, bridge: 'br0', ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
+      #nodeconfig.vm.network :public_network, bridge: 'br0', ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
+      nodeconfig.vm.network :public_network, ip: node[:ip], dev: 'br0', gateway: node[:gw]
       # b.vm.synced_folder "../data", "/vagrant_data"
 
       #load File.expand_path('./configs/Vagrantfile.rancher')
@@ -58,6 +61,7 @@ Vagrant.configure("2") do |config|
       nodeconfig.vm.provider "libvirt" do |dom|
         #dom.linked_clone = true
         #dom.name = 'Vagrant-' + node[:hostname]
+        dom.disk_bus = 'sata'
         dom.cpus = node[:vcpus] 
         dom.memory = node[:ram]
       end
@@ -70,14 +74,45 @@ Vagrant.configure("2") do |config|
       # Enable provisioning with a shell script. Additional provisioners such as
       # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
       # documentation for more information about their specific syntax and use.
-      nodeconfig.vm.provision "shell", inline: <<-SHELL
-        yum -y update
-        yum install -y yum-utils device-mapper-persistent-data lvm2
-        yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-        yum install -y docker-ce
-        systemctl enable docker
-        systemctl start docker
-       SHELL
+      if boxtype.include? "centos"
+        nodeconfig.vm.provision "shell", inline: <<-SHELL
+          yum -y update
+          yum install -y yum-utils device-mapper-persistent-data lvm2
+          yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+          yum install -y docker-ce
+          systemctl enable docker
+          systemctl start docker
+        SHELL
+
+        #reboot
+        nodeconfig.vm.provision :reload
+      end
+
+      if boxtype.include? "ubuntu"
+        nodeconfig.vm.provision "shell", inline: <<-SHELL
+          rm -f /etc/resolv.conf
+          echo nameserver 8.8.8.8 > /etc/resolv.conf
+          echo nameserver 8.8.4.4 >> /etc/resolv.conf
+          apt-get update
+          apt-get  install apt-transport-https ca-certificates curl software-properties-common -y
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          
+          add-apt-repository \
+          "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+          $(lsb_release -cs) \
+          test"
+
+          apt-get update
+          apt-get install docker-ce -y
+
+          systemctl enable docker
+          #systemctl start docker
+        SHELL
+
+        #reboot
+        nodeconfig.vm.provision :reload
+
+      end
     end
   end
 end
