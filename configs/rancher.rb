@@ -13,11 +13,13 @@ networktype = 'public_network'
 #vmswitch = 'Bridged Adapter'
 vmswitch = 'Default Switch'
 basesubnet = '192.168.69.'
+gateway = '1'
+boxtype = 'generic/ubuntu1810'
 
 
 #puts 'in rancher.rb'
 nodes = [
-  { :hostname => 'rancher', :ip => basesubnet + '44', :box => 'generic/centos7', :ram => '2048', :vcpus => '2' }
+  { :hostname => 'rancher', :ip => basesubnet + '44', :box => boxtype, :ram => '2048', :vcpus => '2' }
 ]
 
 Vagrant.configure("2") do |config|
@@ -38,7 +40,7 @@ Vagrant.configure("2") do |config|
       #b.vm.network "public_network", bridge: 'LAN'
       #nodeconfig.vm.network networktype, bridge: vmswitch, ip: node[:ip]
       #nodeconfig.vm.network :public_network, bridge: 'br0', ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
-      nodeconfig.vm.network :public_network, ip: node[:ip], dev: 'br0', gateway: '192.168.69.1'
+      nodeconfig.vm.network :public_network, ip: node[:ip], dev: 'br0', gateway: '192.168.69.1', :gw => basesubnet+gateway
       # b.vm.synced_folder "../data", "/vagrant_data"
 
       
@@ -62,8 +64,6 @@ Vagrant.configure("2") do |config|
       end
 
       nodeconfig.vm.provider "libvirt" do |dom|
-        #dom.linked_clone = true
-        #dom.name = 'Vagrant-' + node[:hostname]
         dom.disk_bus = 'sata'
         dom.cpus = node[:vcpus] 
         dom.memory = node[:ram]
@@ -77,16 +77,47 @@ Vagrant.configure("2") do |config|
       # Enable provisioning with a shell script. Additional provisioners such as
       # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
       # documentation for more information about their specific syntax and use.
-      nodeconfig.vm.provision "shell", inline: <<-SHELL
-          yum -y update
-          yum install -y yum-utils device-mapper-persistent-data lvm2
-          yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-          yum install -y docker-ce
-          systemctl enable docker
-          systemctl start docker
+      if boxtype.include? "centos"
+        nodeconfig.vm.provision "shell", inline: <<-SHELL
+            yum -y update
+            yum install -y yum-utils device-mapper-persistent-data lvm2
+            yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+            yum install -y docker-ce
+            systemctl enable docker
+            systemctl start docker
 
+            docker run -d --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher:latest
+        SHELL
+      end
+
+      if boxtype.include? "ubuntu"
+        nodeconfig.vm.provision "shell", inline: <<-SHELL
+          rm -f /etc/resolv.conf
+          echo nameserver 8.8.8.8 > /etc/resolv.conf
+          echo nameserver 8.8.4.4 >> /etc/resolv.conf
+          apt-get update
+          apt-get  install apt-transport-https ca-certificates curl software-properties-common -y
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          
+          add-apt-repository \
+          "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+          $(lsb_release -cs) \
+          test"
+
+          apt-get update
+          apt-get install docker-ce -y
+
+          systemctl enable docker
+          #systemctl start docker
+        SHELL
+
+        #reboot
+        nodeconfig.vm.provision :reload
+
+        nodeconfig.vm.provision "shell", inline: <<-SHELL
           docker run -d --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher:latest
-       SHELL
+        SHELL
+      end
     end
   end
 end
