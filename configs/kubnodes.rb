@@ -62,6 +62,8 @@ Vagrant.configure("2") do |config|
         dom.disk_bus = 'sata'
         dom.cpus = node[:vcpus] 
         dom.memory = node[:ram]
+        dom.cpu_mode = 'custom'
+        dom.cpu_model = 'kvm64'
       end
 
 
