@@ -7,7 +7,7 @@
 
 
 
-vagrantfiles = %w[./configs/rancher.rb  ./configs/kubnodes.rb ]
+vagrantfiles = %w[./configs/rancher.rb  ./configs/kubnodes.rb ./configs/ceph.rb ]
 
 
 #vagrantfiles = Dir.glob("./configs/*")
